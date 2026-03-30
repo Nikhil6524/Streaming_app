@@ -32,7 +32,6 @@ def upload_chunk(
 def complete_upload(
     upload_id: str = Form(...),
     total_chunks: int = Form(...),
-    title: str = Form(...),
     user_id: str = Cookie(None),
     db: Session = Depends(get_db)
 ):
@@ -48,7 +47,7 @@ def complete_upload(
     # save in DB
     repo = VideoRepository(db)
     video = repo.create_video({
-        "title": title,
+        "title": "chunk_video.mp4",
         "url": url,
         "owner_id": user_id
     })

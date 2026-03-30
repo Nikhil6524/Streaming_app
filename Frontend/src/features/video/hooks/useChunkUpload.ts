@@ -7,7 +7,7 @@ export const useChunkUpload = () => {
   const [progress, setProgress] = useState(0)
   const [loading, setLoading] = useState(false)
 
-  const upload = async (file: File, title: string) => {
+  const upload = async (file: File) => {
     setLoading(true)
 
     try {
@@ -27,7 +27,7 @@ export const useChunkUpload = () => {
         setProgress(Math.round(((i + 1) / totalChunks) * 100))
       }
 
-      const result = await completeUpload(uploadId, totalChunks, title)
+      const result = await completeUpload(uploadId, totalChunks)
 
       return result
     } finally {

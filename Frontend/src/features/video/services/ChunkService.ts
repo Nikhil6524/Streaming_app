@@ -20,13 +20,11 @@ export const uploadChunk = async (
 
 export const completeUpload = async (
   uploadId: string,
-  totalChunks: number,
-  title: string
+  totalChunks: number
 ) => {
   const formData = new FormData()
   formData.append("upload_id", uploadId)
   formData.append("total_chunks", totalChunks.toString())
-  formData.append("title", title)
 
   const res = await api.post("/chunk/complete", formData)
   return res.data

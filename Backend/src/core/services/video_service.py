@@ -8,13 +8,13 @@ class VideoService:
         self.repo = repo
         self.s3 = S3Client()
 
-    def upload_video(self, file, user_id: str, title: str):
+    def upload_video(self, file, user_id: str):
         filename = f"{uuid.uuid4()}.mp4"
 
         url = self.s3.upload_file(file.file, filename)
 
         video = self.repo.create_video({
-            "title": title,
+            "title": filename,
             "url": url,
             "owner_id": user_id
         })

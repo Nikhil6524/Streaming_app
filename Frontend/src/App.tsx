@@ -8,14 +8,7 @@ const App = () => {
   const { user } = useAuthContext()
 
   return (
-    <div
-      style={{
-        padding: "40px",
-        minHeight: "100vh",
-        background: "linear-gradient(135deg,#0f172a,#020617)",
-        color: "#f9fafb",
-      }}
-    >
+    <div style={{ padding: "40px" }}>
       {!user ? (
         <>
           <h2>Login</h2>
@@ -23,33 +16,14 @@ const App = () => {
         </>
       ) : (
         <>
-          <h2 style={{ fontSize: "26px", marginBottom: "20px" }}>
-            Welcome {user.name}
-          </h2>
+          <h2>Welcome {user.name}</h2>
 
           {/* 🔼 Upload Section */}
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "20px",
-              alignItems: "flex-start",
-            }}
-          >
-            <UploadVideo />
-            <UploadChunkVideo />
-          </div>
+          <UploadVideo />
+          <UploadChunkVideo />
 
           {/* 🎥 Video Feed */}
-          <div
-            style={{
-              marginTop: "40px",
-              padding: "20px",
-              borderRadius: "16px",
-              background: "rgba(15,23,42,0.7)",
-              border: "1px solid rgba(148,163,184,0.4)",
-            }}
-          >
+          <div style={{ marginTop: "40px" }}>
             <VideoList />
           </div>
         </>
