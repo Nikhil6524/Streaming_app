@@ -21,7 +21,7 @@ def google_login(
     value=str(user.id),
     httponly=True,
     samesite="lax",
-    secure=False  #  IMPORTANT for localhost
+    secure=False 
     )
     #  Step 3: return user
     return {

@@ -7,11 +7,16 @@ export const useChunkUpload = () => {
   const [progress, setProgress] = useState(0)
   const [loading, setLoading] = useState(false)
 
-  const upload = async (file: File) => {
+  const upload = async (file: File, title: string) => {
     setLoading(true)
 
     try {
-      const uploadId = await initUpload()
+      // Use the original file name as the logical "filename" key
+      // for the backend chunking API.
+      const filename = file.name
+
+      // Initialize upload session on the backend
+      const uploadKey = await initUpload(filename)
 
       const totalChunks = Math.ceil(file.size / CHUNK_SIZE)
 
@@ -21,13 +26,13 @@ export const useChunkUpload = () => {
 
         const chunk = file.slice(start, end)
 
-        await uploadChunk(uploadId, i, chunk)
+  await uploadChunk(uploadKey, i, chunk)
 
         // 🔥 update progress
         setProgress(Math.round(((i + 1) / totalChunks) * 100))
       }
 
-      const result = await completeUpload(uploadId, totalChunks)
+      const result = await completeUpload(uploadKey, totalChunks, title)
 
       return result
     } finally {

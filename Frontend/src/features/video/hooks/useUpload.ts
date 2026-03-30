@@ -1,15 +1,15 @@
-import { useState,useEffect } from "react"
-import { uploadVideo } from "../services/videoservice"
+import { useState, useEffect } from "react"
+import { uploadVideo, getVideos } from "../services/videoservice"
 
 export const useUpload = () => {
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState(0)
 
-  const upload = async (file: File) => {
+  const upload = async (file: File, title: string) => {
     setLoading(true)
 
     try {
-      const data = await uploadVideo(file)
+      const data = await uploadVideo(file, title)
       console.log("Uploaded:", data)
       return data
     } finally {
@@ -20,14 +20,15 @@ export const useUpload = () => {
   return { upload, loading, progress }
 }
 
-import { getVideos } from "../services/videoservice"
-
-export const useVideos = () => {
+export const useVideos = (refreshKey = 0) => {
   const [videos, setVideos] = useState<any[]>([])
+  const [refreshIndex, setRefreshIndex] = useState(0)
+
+  const refresh = () => setRefreshIndex((prev) => prev + 1)
 
   useEffect(() => {
     getVideos().then(setVideos)
-  }, [])
+  }, [refreshIndex, refreshKey])
 
-  return { videos }
+  return { videos, refresh }
 }

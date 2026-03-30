@@ -8,7 +8,7 @@ router = APIRouter(prefix="/user", tags=["User"])
 
 @router.get("/me")
 def get_current_user(
-    user_id: str = Cookie(None, alias="user_id"),  # 🔥 ADD alias
+    user_id: str = Cookie(None, alias="user_id"),  #  ADD alias
     db: Session = Depends(get_db)
 ):
     print("COOKIE VALUE:", user_id)

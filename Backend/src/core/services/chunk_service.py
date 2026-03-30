@@ -1,43 +1,65 @@
 import os
 import uuid
+from pathlib import Path
 from handlers.storage.s3_client import S3Client
-
-UPLOAD_DIR = "tmp/uploads"
 
 
 class ChunkService:
     def __init__(self):
+        self.upload_dir = "uploads"
         self.s3 = S3Client()
 
-    def init_upload(self):
-        upload_id = str(uuid.uuid4())
-        path = os.path.join(UPLOAD_DIR, upload_id)
-        os.makedirs(path, exist_ok=True)
-        return upload_id
+        os.makedirs(self.upload_dir, exist_ok=True)
 
-    def save_chunk(self, upload_id: str, chunk_index: int, file):
-        path = os.path.join(UPLOAD_DIR, upload_id)
-        chunk_path = os.path.join(path, f"chunk_{chunk_index}")
+    def save_chunk(self, content: bytes, filename: str, chunk_index: int):
+        """Save an individual chunk given its raw bytes."""
+        chunk_dir = os.path.join(self.upload_dir, filename)
+        os.makedirs(chunk_dir, exist_ok=True)
+
+        chunk_path = os.path.join(chunk_dir, f"chunk_{chunk_index}")
 
         with open(chunk_path, "wb") as f:
-            f.write(file.file.read())
+            f.write(content)
 
-    def merge_chunks(self, upload_id: str, total_chunks: int):
-        path = os.path.join(UPLOAD_DIR, upload_id)
-        final_file_path = os.path.join(path, "final.mp4")
+        return chunk_path
 
-        with open(final_file_path, "wb") as final_file:
+    def merge_chunks(self, filename: str, total_chunks: int):
+        """
+        Merge all chunks into a single file
+        """
+        chunk_dir = os.path.join(self.upload_dir, filename)
+        final_path = os.path.join(self.upload_dir, f"{filename}.mp4")
+
+        with open(final_path, "wb") as final_file:
             for i in range(total_chunks):
-                chunk_path = os.path.join(path, f"chunk_{i}")
+                chunk_path = os.path.join(chunk_dir, f"chunk_{i}")
+
                 with open(chunk_path, "rb") as chunk_file:
                     final_file.write(chunk_file.read())
 
-        return final_file_path
+        return final_path
 
-    def upload_to_s3(self, file_path: str):
-        filename = f"{uuid.uuid4()}.mp4"
+    def upload_to_s3(self, final_path: str, filename: str):
+        """
+        Upload merged file to S3
+        """
+        # Use a safe generated key for S3 object name.
+        # User-provided filenames can include spaces/special chars and extensions.
+        base_name = Path(filename).stem or "video"
+        object_name = f"{base_name}_{uuid.uuid4().hex}.mp4"
+        s3_key = f"videos/{object_name}"
 
-        with open(file_path, "rb") as f:
-            url = self.s3.upload_file(f, filename)
+        url = self.s3.upload_file(final_path, s3_key)
 
         return url
+
+    def cleanup(self, filename: str):
+        """
+        Remove chunks after upload
+        """
+        chunk_dir = os.path.join(self.upload_dir, filename)
+
+        for file in os.listdir(chunk_dir):
+            os.remove(os.path.join(chunk_dir, file))
+
+        os.rmdir(chunk_dir)
