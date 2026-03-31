@@ -2,6 +2,7 @@ from handlers.storage.s3_client import S3Client
 from data.repositories.video_repo import VideoRepository
 import uuid
 from handlers.kafka.producer import publish_event
+from config.settings import settings
 
 
 class VideoService:
@@ -31,7 +32,7 @@ class VideoService:
         "s3_url": video.url,
     }
 
-        publish_event("video_uploaded", video_data)
+        publish_event(settings.kafka_topic, video_data)
 
         return video
     def list_videos(self):

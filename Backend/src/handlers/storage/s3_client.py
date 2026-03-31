@@ -48,5 +48,12 @@ class S3Client:
             ExpiresIn=expires_in,
         )
 
+    def object_exists(self, s3_key: str):
+        try:
+            self.s3.head_object(Bucket=self.bucket, Key=s3_key)
+            return True
+        except Exception:
+            return False
+
     def download_file(self, s3_key: str, local_path: str):
         self.s3.download_file(self.bucket, s3_key, local_path)

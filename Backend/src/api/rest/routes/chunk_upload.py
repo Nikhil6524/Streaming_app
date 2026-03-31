@@ -1,9 +1,12 @@
-from fastapi import APIRouter, UploadFile, File, Form, Depends, Cookie, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, Depends, Cookie, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from core.services.chunk_service import ChunkService
 from sqlalchemy.orm import Session
 from data.clients.postgres_client import get_db
 from data.repositories.video_repo import VideoRepository
+from handlers.kafka.producer import publish_event
+from config.settings import settings
+from core.services.transcode_service import process_video_task
 
 router = APIRouter(prefix="/chunk", tags=["Chunk Upload"])
 
@@ -54,6 +57,7 @@ async def upload_chunk(
 # =========================
 @router.post("/complete")
 def complete_upload(
+    background_tasks: BackgroundTasks,
     filename: str = Form(...),
     total_chunks: int = Form(...),
     title: str = Form(...),
@@ -80,6 +84,25 @@ def complete_upload(
             "url": url,
             "owner_id": user_id,
         }
+    )
+
+    publish_event(
+        settings.kafka_topic,
+        {
+            "video_id": video.id,
+            "user_id": video.owner_id,
+            "s3_url": video.url,
+        },
+    )
+
+    # Run local fallback processing so transcoding still happens even if Kafka topic is unavailable.
+    background_tasks.add_task(
+        process_video_task,
+        {
+            "video_id": video.id,
+            "user_id": video.owner_id,
+            "s3_url": video.url,
+        },
     )
 
     # Cleanup temp files

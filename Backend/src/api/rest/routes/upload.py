@@ -1,8 +1,9 @@
-from fastapi import APIRouter, UploadFile, File, Form, Depends, Cookie, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, Depends, Cookie, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from data.clients.postgres_client import get_db
 from data.repositories.video_repo import VideoRepository
 from core.services.video_service import VideoService
+from core.services.transcode_service import process_video_task
 
 router = APIRouter(prefix="/upload", tags=["Upload"])
 
@@ -14,6 +15,7 @@ def get_video_service(db: Session = Depends(get_db)):
 
 @router.post("/")
 def upload_video(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     title: str = Form(...),
     user_id: str = Cookie(None),
@@ -27,6 +29,16 @@ def upload_video(
         raise HTTPException(status_code=400, detail="Only MP4 files are allowed")
 
     video = service.upload_video(file, user_id, title)
+
+    # Run local fallback processing so transcoding still happens even if Kafka topic is unavailable.
+    background_tasks.add_task(
+        process_video_task,
+        {
+            "video_id": video.id,
+            "user_id": video.owner_id,
+            "s3_url": video.url,
+        },
+    )
 
     return {
         "id": video.id,

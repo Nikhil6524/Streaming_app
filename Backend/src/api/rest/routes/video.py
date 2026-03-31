@@ -33,17 +33,29 @@ def get_videos(service: VideoService = Depends(get_video_service)):
     response = []
 
     for v in videos:
+        original_s3_key = s3_client.get_s3_key_from_url(v.url)
         playable_url = to_playable_url(v.url)
+
+        quality_urls = {
+            "360p": playable_url,
+            "480p": playable_url,
+            "720p": playable_url,
+        }
+
+        if original_s3_key:
+            # Prefer processed renditions if transcoding output exists.
+            for quality in ("360p", "480p", "720p"):
+                rendition_key = f"processed/{v.id}/{quality}.mp4"
+
+                if s3_client.object_exists(rendition_key):
+                    quality_urls[quality] = s3_client.generate_presigned_url(rendition_key)
+
         response.append(
             {
                 "id": v.id,
                 "url": playable_url,
                 "title": v.title,
-                "quality_urls": {
-                    "360p": playable_url,
-                    "480p": playable_url,
-                    "720p": playable_url,
-                },
+                "quality_urls": quality_urls,
             }
         )
 
