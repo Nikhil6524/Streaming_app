@@ -1,5 +1,6 @@
 import os
 import uuid
+import shutil
 from pathlib import Path
 from handlers.storage.s3_client import S3Client
 
@@ -55,11 +56,21 @@ class ChunkService:
 
     def cleanup(self, filename: str):
         """
-        Remove chunks after upload
+        Remove chunks and merged file after upload
         """
         chunk_dir = os.path.join(self.upload_dir, filename)
+        final_path = os.path.join(self.upload_dir, f"{filename}.mp4")
 
-        for file in os.listdir(chunk_dir):
-            os.remove(os.path.join(chunk_dir, file))
+        # Remove chunk directory and all its contents
+        if os.path.exists(chunk_dir):
+            try:
+                shutil.rmtree(chunk_dir)
+            except Exception as e:
+                print(f"Warning: Failed to remove chunk directory {chunk_dir}: {e}")
 
-        os.rmdir(chunk_dir)
+        # Remove merged file
+        if os.path.exists(final_path):
+            try:
+                os.remove(final_path)
+            except Exception as e:
+                print(f"Warning: Failed to remove merged file {final_path}: {e}")

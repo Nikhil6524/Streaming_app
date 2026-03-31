@@ -13,7 +13,7 @@ class GoogleOAuthClient:
 
         data = response.json()
 
-        # 🔥 IMPORTANT SECURITY CHECK
+        #  IMPORTANT SECURITY CHECK
         if data.get("aud") != settings.google_client_id:
             raise HTTPException(status_code=401, detail="Invalid audience")
 

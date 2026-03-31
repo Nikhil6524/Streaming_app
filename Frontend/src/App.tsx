@@ -3,13 +3,19 @@ import LoginButton from "./features/auth/components/LoginButton"
 import { useAuthContext } from "./features/auth/context/AuthContext"
 import VideoList from "./features/video/componenets/VideoList"
 import UploadChunkVideo from "./features/video/componenets/UploadChunkVideo"
+import SearchPanel from "./features/search/components/SearchPanel"
+import { Button } from "./components/ui/Button"
 
 const App = () => {
-  const { user } = useAuthContext()
+  const { user, isLoadingUser, logoutUser } = useAuthContext()
   const [videoRefreshKey, setVideoRefreshKey] = useState(0)
 
   const handleUploadSuccess = () => {
     setVideoRefreshKey((prev) => prev + 1)
+  }
+
+  const handleLogout = async () => {
+    await logoutUser()
   }
 
   return (
@@ -29,14 +35,21 @@ const App = () => {
           margin: "0 auto",
         }}
       >
-      {!user ? (
+      {isLoadingUser ? (
+        <p style={{ color: "#93c5fd" }}>Checking session...</p>
+      ) : !user ? (
         <>
           <h2 style={{ marginBottom: "16px" }}>Login</h2>
           <LoginButton />
         </>
       ) : (
         <>
-          <h2 style={{ marginBottom: "8px" }}>Welcome {user.name}</h2>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+            <h2>Welcome {user.name}</h2>
+            <Button variant="secondary" onClick={handleLogout}>
+              Logout
+            </Button>
+          </div>
           <p style={{ marginBottom: "24px", color: "#9ca3af" }}>
             Upload your videos and see them appear instantly in your feed.
           </p>
@@ -55,6 +68,10 @@ const App = () => {
 
           {/*  Video Feed */}
           <div style={{ marginTop: "32px" }}>
+            <SearchPanel refreshKey={videoRefreshKey} />
+          </div>
+
+          <div style={{ marginTop: "24px" }}>
             <VideoList refreshKey={videoRefreshKey} />
           </div>
         </>

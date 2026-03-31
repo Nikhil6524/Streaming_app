@@ -113,7 +113,10 @@ def complete_upload(
     )
 
     # Cleanup temp files
-    service.cleanup(filename)
+    try:
+        service.cleanup(filename)
+    except Exception as e:
+        print(f"Cleanup failed: {e}")
 
     return {
         "message": "Upload complete",

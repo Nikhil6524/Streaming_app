@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { initUpload, uploadChunk, completeUpload } from "../services/chunkService"
+import { initUpload, uploadChunk, completeUpload } from "../services/ChunkService"
 
 const CHUNK_SIZE = 5 * 1024 * 1024 // 5MB
 

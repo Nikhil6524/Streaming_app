@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react"
-import { uploadVideo, getVideos } from "../services/videoservice"
+import { uploadVideo, getVideos } from "../services/VideoService"
 
 export const useUpload = () => {
   const [loading, setLoading] = useState(false)
-  const [progress, setProgress] = useState(0)
+  const [progress] = useState(0)
 
   const upload = async (file: File, title: string) => {
     setLoading(true)

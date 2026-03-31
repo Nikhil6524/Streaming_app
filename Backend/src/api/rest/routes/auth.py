@@ -17,11 +17,12 @@ def google_login(
 
     #  Step 2: set session cookie
     response.set_cookie(
-    key="user_id",
-    value=str(user.id),
-    httponly=True,
-    samesite="lax",
-    secure=False 
+        key="user_id",
+        value=str(user.id),
+        httponly=True,
+        samesite="lax",
+        secure=False,
+        max_age=604800  # 7 days
     )
     #  Step 3: return user
     return {
@@ -32,3 +33,14 @@ def google_login(
             "name": user.name
         }
     }
+
+
+@router.post("/logout")
+def logout(response: Response):
+    #  Clear the session cookie
+    response.delete_cookie(
+        key="user_id",
+        samesite="lax",
+        secure=False
+    )
+    return {"message": "Logout successful"}

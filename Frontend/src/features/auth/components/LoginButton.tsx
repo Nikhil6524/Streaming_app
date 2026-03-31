@@ -14,8 +14,12 @@ const LoginButton = () => {
     window.google.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
       callback: async (response: any) => {
-        console.log("TOKEN:", response.credential)
-        await loginWithGoogle(response.credential)
+        try {
+          await loginWithGoogle(response.credential)
+        } catch (error) {
+          console.error("Google login failed", error)
+          alert("Login failed. Please try again.")
+        }
       },
     })
 

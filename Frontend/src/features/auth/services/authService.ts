@@ -9,3 +9,8 @@ export const getCurrentUser = async () => {
   const res = await api.get("/user/me")
   return res.data
 }
+
+export const logout = async () => {
+  const res = await api.post("/auth/logout")
+  return res.data
+}
