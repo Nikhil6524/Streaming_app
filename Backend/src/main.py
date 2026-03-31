@@ -8,11 +8,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.rest.routes.upload import router as upload_router
 from api.rest.routes.video import router as video_router
 from api.rest.routes.chunk_upload import router as chunk_router
-
+from api.rest.routes.search import router as search_router
 
 
 app = FastAPI()
 
+
+app.include_router(search_router)
 app.include_router(video_router)
 app.include_router(upload_router)
 app.include_router(user_router)

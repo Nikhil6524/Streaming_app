@@ -3,6 +3,7 @@ from data.repositories.video_repo import VideoRepository
 import uuid
 from handlers.kafka.producer import publish_event
 from config.settings import settings
+from handlers.search.index_video import index_video
 
 
 class VideoService:
@@ -33,6 +34,12 @@ class VideoService:
     }
 
         publish_event(settings.kafka_topic, video_data)
+
+        try:
+            # Index early so title search works immediately after upload.
+            index_video(video)
+        except Exception as exc:
+            print("OpenSearch index error:", str(exc))
 
         return video
     def list_videos(self):

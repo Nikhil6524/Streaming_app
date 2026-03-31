@@ -7,6 +7,7 @@ from data.repositories.video_repo import VideoRepository
 from handlers.kafka.producer import publish_event
 from config.settings import settings
 from core.services.transcode_service import process_video_task
+from handlers.search.index_video import index_video
 
 router = APIRouter(prefix="/chunk", tags=["Chunk Upload"])
 
@@ -85,6 +86,12 @@ def complete_upload(
             "owner_id": user_id,
         }
     )
+
+    try:
+        # Index early so title search works immediately after upload.
+        index_video(video)
+    except Exception as exc:
+        print("OpenSearch index error:", str(exc))
 
     publish_event(
         settings.kafka_topic,

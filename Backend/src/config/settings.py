@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     kafka_cert_path: str
     kafka_key_path: str
 
+    opensearch_host: str
+    opensearch_port: int
+    opensearch_user: str
+    opensearch_password: str
+
     class Config:
         env_file = BASE_DIR / ".env"
         env_file_encoding = "utf-8"
