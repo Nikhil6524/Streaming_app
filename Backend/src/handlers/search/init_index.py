@@ -24,7 +24,7 @@ def create_index():
     }
 
     client.indices.create(index=INDEX_NAME, body=body)
-    print("Index created ✅")
+    print("Index created ")
 
 
 if __name__ == "__main__":

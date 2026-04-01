@@ -13,10 +13,6 @@ router = APIRouter(prefix="/chunk", tags=["Chunk Upload"])
 
 service = ChunkService()
 
-
-# =========================
-# INIT (JSON-based)
-# =========================
 class InitRequest(BaseModel):
     filename: str
 
@@ -32,9 +28,7 @@ def init_upload(req: InitRequest):
     }
 
 
-# =========================
-# UPLOAD CHUNK
-# =========================
+
 @router.post("/upload")
 async def upload_chunk(
     file: UploadFile = File(...),
